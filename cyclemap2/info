@@ -1,0 +1,5 @@
+summary: Cyclemap2
+version=1.0
+description {
+    Local.  Modified from Cyclemap by Richard Fairhurst. Code initially based on Munky style by Andy Gates.
+}

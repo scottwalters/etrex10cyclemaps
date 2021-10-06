@@ -1,0 +1,128 @@
+# ------------------------------------------------------------------------------------
+# Preprocessing
+# ------------------------------------------------------------------------------------
+
+# -----	Generic rules for track quality
+
+highway=track | highway=cycleway | highway=footway | highway=bridleway | highway=byway | highway=unsurfaced | highway=path { set offroad=yes; }
+surface=dirt | surface=grass | surface=mud { set difficult=yes; }
+tracktype=grade5 { set difficult=yes; }
+bicycle=impassable | bicycle:mtb=impassable | bicycle:hybrid=difficult | bicycle:hybrid=impassable { set difficult=yes; }
+
+# -----	Generic rules for "cyclable roads" - those which are particularly good for cycling
+#		c1,c2 etc. - 'points' for cyclability
+#		c_override -  not suited for cycling
+
+#traffic=low { set c1=yes; }
+#scenic=yes { set c2=yes; }
+#traffic=high { set c_override=yes; }
+#c1=yes & c2=yes & c_override!=* { set cyclable=yes; }
+
+# ----- Downgrade tracks where bicycles are banned
+#		(ignore motorway/trunk as this'll look stupid)
+
+bicycle=no & ( highway!=motorway & highway!=trunk ) { set highway=footway; }
+access=private { set highway=private; }
+
+# ------------------------------------------------------------------------------------
+# Cycle routes
+# ------------------------------------------------------------------------------------
+
+# (ncn=yes | ncn_ref=*) & national_byway=yes  [0x06 road_class=4 road_speed=7 resolution 16]
+# (rcn=yes | rcn_ref=*) & national_byway=yes  [0x07 road_class=4 road_speed=7 resolution 16]
+# (ncn=yes | ncn_ref=*) & difficult=yes		[0x18 resolution 16]
+# (rcn=yes | rcn_ref=*) & difficult=yes		[0x19 resolution 16]
+# (ncn=yes | ncn_ref=*)						[0x01 road_class=4 road_speed=7 resolution 16]
+# (rcn=yes | rcn_ref=*)						[0x03 road_class=4 road_speed=7 resolution 16]
+# national_byway=yes				    		[0x05 road_class=4 road_speed=7 resolution 16]
+
+# think maybe we can't use road_class=0... no effect
+# thinking we can't use some of the higher hex codes.  yes, that seems to have fixed it.
+
+# highway=secondary & cyclable=yes			[0x08 road_class=3 level 0-4]
+# highway=tertiary & cyclable=yes			[0x09 road_class=3 level 0-4]
+# ( highway=unclassified | highway=residential ) & cyclable=yes [0x0A road_class=3 level 0-4]
+
+# ------------------------------------------------------------------------------------
+# Standard roads
+# ------------------------------------------------------------------------------------
+
+# XXX what hex codes to use?
+
+# XXX testing one higher than currently using for residential
+
+# bike shit
+
+# maybe one of 0x03, 0x0B, 0x0C, 0x0D, or 0x0E is making nice dark line lines that would be great for this.  or maybe they aren't.
+# not sure I've seen this on the map yet
+# would like this to pop with a nice dark fine line
+# aha, steams accidentally rendered as international borders, which are perfect.
+
+( highway=* & maxspeed < 35 ) | highway=cycleway | highway=path | highway=unclassified | highway=minor | highway=living_street | highway=service | ( highway=secondary & cyclable=yes ) | ( highway=tertiary & cyclable=yes ) | cycleway=designated | cycleway=lane | cycleway=shared_line | cycleway=shoulder | cycleway:both=track | cycleway:both=shared_lane | cycleway:left=track | cycleway:right=track | cycleway:right=lane | highway=track | bicycle=designated | bicycle=yes | bicycle=permissive		[ 0x1e road_class=4 road_speed=7 level 0-4]
+
+# neighborhood roads
+
+# 0x01 is a big wide blob.
+# 0x02 is a big wide blob in medium grey.
+# 0x03 is a wide blob in medium grey.
+# 0x04 is a wide blob in medium grey.
+# 0x05 is a wide blob in maybe a slightly lighter grey not sure.
+# 0x06 are faint semi-wide lines that turn to faint fine lines when zooming out.
+# 0x07 are some wide stippled thing that does not look good
+# 0x08 is a bit darker line that looks ok.  a really fine dark line would be nice.                               <--
+# 0x09 may be the same as 0x08... fairly fine dark line                                                          <--  one of these two.
+# 0x0a is the stippled shit
+# 0x0b is a big wide blob.
+# 0x0c is a big wide blob.
+# 0x0d does not show up (confirmed)
+# 0x0e does not show up
+
+highway=residential [0x09 road_class=4 road_speed=7 level 0-4]
+
+# Roads
+# 0x03..0x05 seems reasonable at a first glance
+
+highway=motorway | highway=motorway_link [0x03 road_class=1 road_speed=1 level 0-4]
+highway=trunk | highway=trunk_link [0x03 road_class=1 road_speed=1 level 0-4]
+highway=primary | highway=primary_link [0x03 road_class=1 road_speed=2 level 0-4]
+highway=secondary [0x04 road_class=2 road_speed=3 level 0-4]
+highway=tertiary [0x05 road_class=2 road_speed=4 level 0-4]
+
+# XXX most of these are unreachable now
+# Unroutable paths
+# XXX hex codes ... were 0x26-0x28
+# XXx not sure 0x0D shows up
+highway=track & difficult=yes [0x0D level 0-4]
+highway=bridleway & difficult=yes [0x0D level 0-4]
+highway=footway | highway=steps [0x0D level 0-4]
+highway=pedestrian & area!=yes [0x0D level 0-4]
+
+# Routable paths
+# XXX were 0x11-0x13
+highway=byway | highway=unsurfaced [0x06 road_class=4 road_speed=4 level 0-4]
+highway=bridleway [0x06 road_class=3 road_speed=3 level 0-4]
+
+# was 0x17
+# highway=* & area!=yes [0x06 ]
+highway=* & area!=yes [0x06 ]
+
+
+
+
+
+# ------------------------------------------------------------------------------------
+# Miscellaneous stuff
+# ------------------------------------------------------------------------------------
+
+railway=light_rail [0x14 level 0-4]
+railway=rail [0x14 level 0-4]
+railway=subway [0x14 level 0-4]
+railway=tram [0x14 level 0-4]
+natural=coastline [0x15 level 0-4]   # no idea how much sense 0x15 makes for this... not on the map
+# route=ferry [0x1a road_class=1 level 0-4]  # not on the map so don't know how well this works for the etrex 10
+# waterway=stream [0x1e level 0-4]  # wonderful think pitch black line... stole this for bikeways.  so hide this.
+waterway=stream [0x1f level 0-4]  # XXX does this look ok?
+waterway=canal [0x1f level 0-4]
+waterway=drain [0x1f level 0-4]
+waterway=river [0x1f level 0-4]
+
